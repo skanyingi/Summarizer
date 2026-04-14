@@ -1,198 +1,150 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 
 function ProcessingContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const fileName = searchParams.get('file') || 'Document.pdf';
-  
-  const [stage, setStage] = useState(0);
+  const [fileName, setFileName] = useState('');
+  const [isProcessing, setIsProcessing] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const hasStarted = useRef(false);
-  
-  const stages = [
-    { name: 'Extracting text', message: 'OCR scanning document pages...', done: false },
-    { name: 'Analyzing content', message: 'Identifying key sections and entities...', done: false },
-    { name: 'Generating summary', message: 'Synthesizing document narrative...', done: false },
-    { name: 'Finalizing', message: 'Structuring insights for export...', done: false },
-  ];
 
   useEffect(() => {
-    if (hasStarted.current) return;
-    hasStarted.current = true;
+    const file = searchParams.get('file');
+    if (file) {
+      setFileName(file);
+    }
 
-    const processDocument = async () => {
-      try {
-        const { fileStore } = await import('@/lib/store');
-        const file = fileStore.getFile();
-        
-        if (!file) {
-          setError('No file found to process. Please try uploading again.');
-          return;
+    // Simulate processing
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          setIsProcessing(false);
+          return 100;
         }
+        return prev + Math.random() * 30;
+      });
+    }, 500);
 
-        const progressInterval = setInterval(() => {
-          setProgress((prev) => {
-            if (prev >= 90) return prev;
-            const newProgress = prev + Math.random() * 2;
-            const stageIndex = Math.min(Math.floor(newProgress / 25), 3);
-            setStage(stageIndex);
-            return newProgress;
-          });
-        }, 500);
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/process', {
-          method: 'POST',
-          body: formData,
-        });
-
-        clearInterval(progressInterval);
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Processing failed');
-        }
-
-        const result = await response.json();
-        
-        setProgress(100);
-        setStage(3);
-        
-        sessionStorage.setItem('last_summary', JSON.stringify(result));
-
-        const history = JSON.parse(localStorage.getItem('summary_history') || '[]');
-        history.unshift({
-          id: Date.now().toString(),
-          name: fileName,
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          size: (file.size / 1024 / 1024).toFixed(1) + ' MB',
-          status: 'completed',
-          category: result.title?.includes('Financial') ? 'Finance' : 'General',
-          insight: result.insights?.[0],
-          fullData: result
-        });
-        localStorage.setItem('summary_history', JSON.stringify(history));
-
-        setTimeout(() => {
-          router.push(`/summary?file=${encodeURIComponent(fileName)}`);
-        }, 800);
-
-      } catch (err: any) {
-        console.error('Processing error:', err);
-        setError(err.message || 'An unexpected error occurred');
-      }
-    };
-
-    processDocument();
-  }, [fileName, router]);
+    return () => clearInterval(interval);
+  }, [searchParams]);
 
   return (
-    <div className=\"flex min-h-screen\">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main className=\"md:ml-64 min-h-screen relative flex flex-col items-center justify-center p-8 w-full\">
-        <div className=\"max-w-4xl w-full flex flex-col items-center gap-12\">
-          {error ? (
-            <div className=\"bg-red-50 border border-red-200 p-8 rounded-xl text-center max-w-md\">
-              <span className=\"material-symbols-outlined text-red-500 text-5xl mb-4\">error</span>
-              <h2 className=\"text-xl font-bold text-red-900 mb-2\">Processing Error</h2>
-              <p className=\"text-red-700 mb-6\">{error}</p>
-              <button 
-                onClick={() => router.push('/upload')}
-                className=\"bg-red-600 text-white px-6 py-2 rounded-lg font-medium\"
-              >
-                Go Back
-              </button>
+      <main className="md:ml-64 min-h-screen relative flex flex-col items-center justify-center p-8 w-full bg-gray-50">
+        <div className="max-w-2xl w-full flex flex-col items-center gap-12">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Processing Document
+            </h1>
+            <p className="text-gray-600">
+              {fileName || 'Your document'}
+            </p>
+          </div>
+
+          <div className="w-full bg-white rounded-xl p-8 shadow-lg">
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  {isProcessing ? 'Processing...' : 'Complete'}
+                </span>
+                <span className="text-sm font-medium text-gray-600">
+                  {Math.min(100, Math.round(progress))}%
+                </span>
+              </div>
+              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min(100, progress)}%` }}
+                />
+              </div>
             </div>
-          ) : (
-            <div className=\"w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center\">
-              <div className=\"md:col-span-5\">
-                <div className=\"bg-white rounded-xl shadow-lg p-1 overflow-hidden\">
-                  <div className=\"aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden\">
-                    <div className=\"absolute top-0 left-0 w-full h-1 bg-blue-600 shadow-[0_0_15px_rgba(0,52,97,0.5)] animate-pulse\" />
-                    <div className=\"absolute inset-0 flex items-center justify-center pointer-events-none\">
-                      <div className=\"bg-white/90 p-6 rounded-full shadow-lg\">
-                        <span className=\"material-symbols-outlined text-blue-800 text-5xl\">description</span>
-                      </div>
-                    </div>
-                  </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Document Uploaded</p>
+                  <p className="text-xs text-gray-500">File received and validated</p>
                 </div>
               </div>
-              
-              <div className=\"md:col-span-7 flex flex-col gap-6\">
-                <div className=\"space-y-2\">
-                  <span className=\"text-xs font-semibold uppercase tracking-wider text-blue-800\">
-                    AI Processing
-                  </span>
-                  <h2 className=\"text-3xl font-bold text-gray-900 leading-tight\">
-                    {fileName}
-                  </h2>
-                  <p className=\"text-gray-600\">
-                    Engaging AI Engine...
-                  </p>
-                </div>
 
-                <div className=\"space-y-3\">
-                  <div className=\"flex justify-between items-end\">
-                    <span className=\"text-sm font-medium text-blue-800\">
-                      {stages[stage]?.name || 'Complete'}
-                    </span>
-                    <span className=\"text-lg font-bold text-blue-800\">
-                      {Math.round(progress)}%
-                    </span>
-                  </div>
-                  <div className=\"h-3 w-full bg-gray-200 rounded-full overflow-hidden\">
-                    <div
-                      className=\"h-full bg-gradient-to-r from-blue-700 to-blue-800 transition-all duration-700\"
-                      style={{ width: progress + '%' }}
-                    />
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${progress > 25 ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  {progress > 25 ? (
+                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
+                  )}
                 </div>
-
-                <div className=\"flex flex-col gap-4 mt-2\">
-                  {stages.map((s, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-center gap-4 p-4 rounded-xl shadow-sm border-l-4 transition-all ${
-                        i < stage
-                          ? 'bg-white border-blue-800'
-                          : i === stage
-                          ? 'bg-white border-blue-800/50'
-                          : 'bg-white border-gray-200 opacity-50'
-                      }`}
-                    >
-                      <span
-                        className={`material-symbols-outlined ${
-                          i < stage ? 'text-green-600' : 'text-blue-800'
-                        }`}
-                      >
-                        {i < stage ? 'check_circle' : 'sync'}
-                      </span>
-                      <div className=\"flex-1\">
-                        <p className=\"text-sm font-semibold text-gray-900\">
-                          {s.name}
-                        </p>
-                        <p className=\"text-xs text-gray-500\">
-                          {s.message}
-                        </p>
-                      </div>
-                      {i < stage && (
-                        <span className=\"material-symbols-outlined text-green-600\">
-                          check_circle
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Extracting Text</p>
+                  <p className="text-xs text-gray-500">OCR and content parsing</p>
                 </div>
               </div>
+
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${progress > 50 ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  {progress > 50 ? (
+                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Analyzing Content</p>
+                  <p className="text-xs text-gray-500">AI semantic analysis in progress</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${progress > 75 ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  {progress > 75 ? (
+                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Generating Summary</p>
+                  <p className="text-xs text-gray-500">Creating insights and metadata</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {!isProcessing && (
+            <div className="w-full">
+              <a
+                href="/summary"
+                className="block w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-colors"
+              >
+                View Summary
+              </a>
             </div>
           )}
+        </div>
+      </main>
+    </div>
+  );
+}
 
-          {!error && (
-            <div className=\"fixed bottom-12 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl py-3 px-6 rounded-full sha
+export default function ProcessingPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <ProcessingContent />
+    </Suspense>
+  );
+}
