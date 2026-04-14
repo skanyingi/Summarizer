@@ -6,7 +6,8 @@ import PDFParser from "pdf2json";
  */
 async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser(null, 1); // 1 for text only
+    //const pdfParser = new PDFParser(null, 1); // 1 for text only
+    const pdfParser = new PDFParser(null, true);
 
     pdfParser.on("pdfParser_dataError", (errData: any) => reject(errData.parserError));
     pdfParser.on("pdfParser_dataReady", () => {
