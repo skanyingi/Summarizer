@@ -81,7 +81,7 @@ function ProcessingContent() {
         localStorage.setItem('summary_history', JSON.stringify(history));
 
         setTimeout(() => {
-          router.push(\"/summary?file=\" + encodeURIComponent(fileName));
+          router.push(`/summary?file=${encodeURIComponent(fileName)}`);
         }, 800);
 
       } catch (err: any) {
