@@ -81,7 +81,7 @@ function ProcessingContent() {
         localStorage.setItem('summary_history', JSON.stringify(history));
 
         setTimeout(() => {
-          router.push(`/summary?file=${encodeURIComponent(fileName)}`);
+          router.push(\"/summary?file=\" + encodeURIComponent(fileName));
         }, 800);
 
       } catch (err: any) {
@@ -94,68 +94,68 @@ function ProcessingContent() {
   }, [fileName, router]);
 
   return (
-    <div className='flex min-h-screen'>
+    <div className=\"flex min-h-screen\">
       <Sidebar />
-      <main className='md:ml-64 min-h-screen relative flex flex-col items-center justify-center p-8 w-full'>
-        <div className='max-w-4xl w-full flex flex-col items-center gap-12'>
+      <main className=\"md:ml-64 min-h-screen relative flex flex-col items-center justify-center p-8 w-full\">
+        <div className=\"max-w-4xl w-full flex flex-col items-center gap-12\">
           {error ? (
-            <div className='bg-red-50 border border-red-200 p-8 rounded-xl text-center max-w-md'>
-              <span className='material-symbols-outlined text-red-500 text-5xl mb-4'>error</span>
-              <h2 className='text-xl font-bold text-red-900 mb-2'>Processing Error</h2>
-              <p className='text-red-700 mb-6'>{error}</p>
+            <div className=\"bg-red-50 border border-red-200 p-8 rounded-xl text-center max-w-md\">
+              <span className=\"material-symbols-outlined text-red-500 text-5xl mb-4\">error</span>
+              <h2 className=\"text-xl font-bold text-red-900 mb-2\">Processing Error</h2>
+              <p className=\"text-red-700 mb-6\">{error}</p>
               <button 
                 onClick={() => router.push('/upload')}
-                className='bg-red-600 text-white px-6 py-2 rounded-lg font-medium'
+                className=\"bg-red-600 text-white px-6 py-2 rounded-lg font-medium\"
               >
                 Go Back
               </button>
             </div>
           ) : (
-            <div className='w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center'>
-              <div className='md:col-span-5'>
-                <div className='bg-white rounded-xl shadow-lg p-1 overflow-hidden'>
-                  <div className='aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden'>
-                    <div className='absolute top-0 left-0 w-full h-1 bg-blue-600 shadow-[0_0_15px_rgba(0,52,97,0.5)] animate-pulse' />
-                    <div className='absolute inset-0 flex items-center justify-center pointer-events-none'>
-                      <div className='bg-white/90 p-6 rounded-full shadow-lg'>
-                        <span className='material-symbols-outlined text-blue-800 text-5xl'>description</span>
+            <div className=\"w-full grid grid-cols-1 md:grid-cols-12 gap-8 items-center\">
+              <div className=\"md:col-span-5\">
+                <div className=\"bg-white rounded-xl shadow-lg p-1 overflow-hidden\">
+                  <div className=\"aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden\">
+                    <div className=\"absolute top-0 left-0 w-full h-1 bg-blue-600 shadow-[0_0_15px_rgba(0,52,97,0.5)] animate-pulse\" />
+                    <div className=\"absolute inset-0 flex items-center justify-center pointer-events-none\">
+                      <div className=\"bg-white/90 p-6 rounded-full shadow-lg\">
+                        <span className=\"material-symbols-outlined text-blue-800 text-5xl\">description</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className='md:col-span-7 flex flex-col gap-6'>
-                <div className='space-y-2'>
-                  <span className='text-xs font-semibold uppercase tracking-wider text-blue-800'>
+              <div className=\"md:col-span-7 flex flex-col gap-6\">
+                <div className=\"space-y-2\">
+                  <span className=\"text-xs font-semibold uppercase tracking-wider text-blue-800\">
                     AI Processing
                   </span>
-                  <h2 className='text-3xl font-bold text-gray-900 leading-tight'>
+                  <h2 className=\"text-3xl font-bold text-gray-900 leading-tight\">
                     {fileName}
                   </h2>
-                  <p className='text-gray-600'>
+                  <p className=\"text-gray-600\">
                     Engaging AI Engine...
                   </p>
                 </div>
 
-                <div className='space-y-3'>
-                  <div className='flex justify-between items-end'>
-                    <span className='text-sm font-medium text-blue-800'>
+                <div className=\"space-y-3\">
+                  <div className=\"flex justify-between items-end\">
+                    <span className=\"text-sm font-medium text-blue-800\">
                       {stages[stage]?.name || 'Complete'}
                     </span>
-                    <span className='text-lg font-bold text-blue-800'>
+                    <span className=\"text-lg font-bold text-blue-800\">
                       {Math.round(progress)}%
                     </span>
                   </div>
-                  <div className='h-3 w-full bg-gray-200 rounded-full overflow-hidden'>
+                  <div className=\"h-3 w-full bg-gray-200 rounded-full overflow-hidden\">
                     <div
-                      className='h-full bg-gradient-to-r from-blue-700 to-blue-800 transition-all duration-700'
-                      style={{ width: `${progress}%` }}
+                      className=\"h-full bg-gradient-to-r from-blue-700 to-blue-800 transition-all duration-700\"
+                      style={{ width: progress + '%' }}
                     />
                   </div>
                 </div>
 
-                <div className='flex flex-col gap-4 mt-2'>
+                <div className=\"flex flex-col gap-4 mt-2\">
                   {stages.map((s, i) => (
                     <div
                       key={i}
@@ -174,16 +174,16 @@ function ProcessingContent() {
                       >
                         {i < stage ? 'check_circle' : 'sync'}
                       </span>
-                      <div className='flex-1'>
-                        <p className='text-sm font-semibold text-gray-900'>
+                      <div className=\"flex-1\">
+                        <p className=\"text-sm font-semibold text-gray-900\">
                           {s.name}
                         </p>
-                        <p className='text-xs text-gray-500'>
+                        <p className=\"text-xs text-gray-500\">
                           {s.message}
                         </p>
                       </div>
                       {i < stage && (
-                        <span className='material-symbols-outlined text-green-600'>
+                        <span className=\"material-symbols-outlined text-green-600\">
                           check_circle
                         </span>
                       )}
@@ -195,5 +195,4 @@ function ProcessingContent() {
           )}
 
           {!error && (
-            <div className='fixed bottom-12 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl py-3 px-6 rounded-full shadow-lg flex items-center gap-6 border border-white/40'>
-           
+            <div className=\"fixed bottom-12 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl py-3 px-6 rounded-full sha
