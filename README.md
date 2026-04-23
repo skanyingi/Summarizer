@@ -1,37 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Curator - AI Document Summarizer
+
+An intelligent document summarization tool that transforms lengthy PDFs into concise, actionable insights using AI.
+
+## Features
+
+- **PDF Upload** - Drag and drop or browse to upload PDF documents for processing
+- **AI-Powered Analysis** - Uses OpenRouter API to extract key information from documents
+- **Executive Summaries** - Automatically generates structured summaries with key insights
+- **Metadata Extraction** - Identifies dates, entities, analysts, and other important metadata
+- **Confidence Scoring** - Provides AI confidence scores for each analysis
+- **Export & Share** - Download summaries as JSON or share with team members
+
+## How It Works
+
+1. **Upload** - Upload a PDF document through the intuitive drag-and-drop interface
+2. **Process** - The AI extracts text and analyzes the document content
+3. **Summarize** - Receive an executive summary with key insights and metadata
+4. **Export** - Download or share the results
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 18, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **AI**: OpenRouter API (Mistral/Sonnet models)
+- **PDF Processing**: pdf2json
+- **Deployment**: Netlify
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ 
+- OpenRouter API key
+
+### Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+OPENROUTER_API_KEY=your_api_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Learn More
+### Deployment
 
-To learn more about Next.js, take a look at the following resources:
+This app deploys to Netlify. Make sure to set the `OPENROUTER_API_KEY` environment variable in your Netlify dashboard.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── api/process/    # PDF processing API endpoint
+│   ├── library/        # Document history page
+│   ├── processing/     # Document processing progress page
+│   ├── summary/        # Results and insights display
+│   ├── upload/         # PDF upload page
+│   └── page.tsx        # Dashboard home
+├── components/         # Reusable UI components
+└── lib/
+    └── store.ts        # Client-side file storage
+```
 
-## Deploy on Vercel
+## Screenshots
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Dashboard** - Upload zone with processing pipeline overview
+- **Processing** - Real-time progress with step-by-step status
+- **Summary** - Executive summary with insights and metadata
+- **Library** - History of processed documents
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-"# Summarizer" 
+## License
+
+MIT
